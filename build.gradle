@@ -1,0 +1,41 @@
+plugins {
+	id 'java'
+	id 'io.quarkus'
+	id 'io.freefair.lombok' version '5.3.0'
+}
+
+repositories {
+	mavenLocal()
+	mavenCentral()
+}
+
+dependencies {
+	implementation enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}")
+	implementation 'io.quarkus:quarkus-smallrye-openapi'
+	implementation 'io.quarkus:quarkus-vertx-web'
+	implementation 'io.quarkus:quarkus-resteasy-jackson'
+	implementation 'io.quarkus:quarkus-resteasy-mutiny'
+	implementation 'io.quarkus:quarkus-reactive-pg-client'
+	implementation 'io.quarkus:quarkus-flyway'
+	implementation 'io.quarkus:quarkus-jdbc-postgresql'
+	implementation 'io.quarkus:quarkus-arc'
+	implementation 'io.quarkus:quarkus-resteasy'
+	testImplementation 'io.quarkus:quarkus-junit5'
+}
+
+group 'com.eternal_search'
+version '1.0-SNAPSHOT'
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_1_8
+	targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+compileJava {
+	options.encoding = 'UTF-8'
+	options.compilerArgs << '-parameters'
+}
+
+compileTestJava {
+	options.encoding = 'UTF-8'
+}
