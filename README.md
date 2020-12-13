@@ -49,13 +49,6 @@ You can then execute your native executable with: `./build/geoip-1.0-SNAPSHOT-ru
 
 If you want to learn more about building native executables, please consult https://quarkus.io/guides/gradle-tooling.
 
-# Config example
-
-<p>This example displays mach speed in your favourite unit, depending on the specified Quarkus configuration.</p>
-<p>The Quarkus configuration is located in: <code>src/main/resources/application.yml</code></p>
-<p><b>Supersonic!</b></p>
-Guide: https://quarkus.io/guides/config#yaml
-
 # RESTEasy JSON serialisation using Jackson
 
 <p>This example demonstrate RESTEasy JSON serialisation by letting you list, add and remove quark types from a list.</p>
