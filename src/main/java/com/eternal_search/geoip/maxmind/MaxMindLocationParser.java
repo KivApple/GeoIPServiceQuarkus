@@ -123,8 +123,10 @@ public class MaxMindLocationParser implements Collector<
 				if (node.getParent() != null) {
 					node.getLocation().setParentId(node.getParent().getLocation().getId());
 				}
-				timezones.add(node.getTimezone());
-				node.getLocation().setTimezoneId((long) Math.abs(node.getTimezone().hashCode()));
+				if (node.getTimezone() != null) {
+					timezones.add(node.getTimezone());
+					node.getLocation().setTimezoneId((long) Math.abs(node.getTimezone().hashCode()));
+				}
 				return node.getLocation();
 			}).collect(Collectors.toList());
 			return new Result(locations, timezones.stream().map(name ->

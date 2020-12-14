@@ -57,7 +57,16 @@ public class MaxMindUpdater implements GeoIPUpdater {
 	@Override
 	public void launchUpdate() {
 		if (updateCancellable.compareAndSet(null, () -> {})) {
-			updateCancellable.set(doLaunchUpdate());
+			updateCancellable.set(doLaunchUpdate(null));
+		} else {
+			log.info("Update is already running");
+		}
+	}
+	
+	@Override
+	public void launchUpdate(InputStream inputStream) {
+		if (updateCancellable.compareAndSet(null, () -> {})) {
+			updateCancellable.set(doLaunchUpdate(inputStream));
 		} else {
 			log.info("Update is already running");
 		}
@@ -78,12 +87,18 @@ public class MaxMindUpdater implements GeoIPUpdater {
 	}
 	
 	private InputStream openDownloadStream() throws IOException {
-		return new BufferedInputStream(buildDownloadUrl().openStream());
+		URL url = buildDownloadUrl();
+		log.infof("Downloading %s...", url);
+		return new BufferedInputStream(url.openStream());
 	}
 	
 	@SneakyThrows(IOException.class)
-	private Path downloadArchive(Path filePath) {
-		Files.copy(openDownloadStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+	private Path downloadArchive(Path filePath, InputStream inputStream) {
+		Files.copy(
+				inputStream != null ? inputStream : openDownloadStream(),
+				filePath,
+				StandardCopyOption.REPLACE_EXISTING
+		);
 		log.infof("Using archive file %s", filePath.toAbsolutePath());
 		return filePath;
 	}
@@ -190,16 +205,16 @@ public class MaxMindUpdater implements GeoIPUpdater {
 	}
 	
 	@SneakyThrows(IOException.class)
-	private Cancellable doLaunchUpdate() {
+	private Cancellable doLaunchUpdate(InputStream inputStream) {
 		updateExecutor.set(
 				ManagedExecutor.builder()
 						.maxAsync(1)
 						.maxQueued(1)
 						.build()
 		);
-		return Uni.createFrom().item(Files.createTempFile("maxmind", ".zip"))
+		return Uni.createFrom().item(Files.createTempFile("maxmind_", ".zip"))
 				.emitOn(updateExecutor.get())
-				.map(this::downloadArchive)
+				.map(path -> downloadArchive(path, inputStream))
 				.flatMap(filePath -> storage.update(updater -> performUpdate(filePath, updater)))
 				.onTermination().invoke(() -> {
 					((ExecutorService) updateExecutor.getAndSet(null)).shutdownNow();

@@ -2,15 +2,20 @@ package com.eternal_search.geoip;
 
 import com.eternal_search.geoip.model.dto.GeoIPAddressDTO;
 import com.eternal_search.geoip.model.dto.GeoIPStatusDTO;
+import com.eternal_search.geoip.model.dto.GeoIPUpdateDTO;
 import com.eternal_search.geoip.service.GeoIPStorage;
 import com.eternal_search.geoip.service.GeoIPUpdater;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
+import lombok.SneakyThrows;
 import org.jboss.resteasy.annotations.jaxrs.PathParam;
+import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+import java.io.IOException;
+import java.io.InputStream;
 
 @Path("/geoip")
 @Produces(MediaType.APPLICATION_JSON)
@@ -39,8 +44,17 @@ public class GeoIPService {
 	
 	@POST
 	@Path("/update")
+	@Consumes("text/plain")
 	public void update() {
 		geoIPUpdater.launchUpdate();
+	}
+	
+	@POST
+	@Path("/update/file")
+	@Consumes("multipart/form-data")
+	@SneakyThrows(IOException.class)
+	public void updateFromFile(@MultipartForm GeoIPUpdateDTO update) {
+		geoIPUpdater.launchUpdate(update.getFile().getBody(InputStream.class, null));
 	}
 	
 	@GET
